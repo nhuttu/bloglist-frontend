@@ -4,6 +4,7 @@ import Login from './components/Login'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import NewBlog from './components/NewBlog'
+import Togglable from './components/Togglable'
 
 const App = () => {
 
@@ -49,7 +50,7 @@ const App = () => {
       )
     return null
   }
-  
+
   const handleLogin = async event => {
     event.preventDefault()
     console.log('logging in with', username, password)
@@ -72,6 +73,29 @@ const App = () => {
   const LogOut = () => {
     setUser(null)
     window.localStorage.removeItem('loggedBlogUser')
+  }
+  const loginForm = () => {
+    return <Login username={username} handleLogin={handleLogin} password={password} setPassword={setPassword} setUsername={setUsername} />
+  }
+  const blogForm = () => {
+    return (
+      <div>
+        <p>{user.name} logged-in
+          <button onClick={() => LogOut()}>
+            log out
+          </button>
+        </p>
+        <div>
+          <Togglable buttonLabel="create new blog">
+          <NewBlog handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
+          </Togglable>
+        </div>
+        <h2>blogs</h2>
+        {blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
+        )}
+      </div>
+    )
   }
   const handleAdd = async event => {
     event.preventDefault()
@@ -101,27 +125,12 @@ const App = () => {
     <div>
       <div>
         <ErrorMsg errorToDisplay={errorMessage} />
-        <SuccessMsg sucToDisplay={sucMessage}/>
+        <SuccessMsg sucToDisplay={sucMessage} />
       </div>
       {user === null ?
-        <Login username={username} handleLogin={handleLogin} password={password} setPassword={setPassword} setUsername={setUsername} />
-        : <div>
-          <p>{user.name} logged-in
-            <button onClick={() => LogOut()}>
-              log out
-            </button>
-          </p>
-          <h2>create new</h2>
-          <div>
-            <NewBlog handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
-          </div>
-          <h2>blogs</h2>
-          {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
-          )}
-        </div>
+        loginForm()
+        : blogForm()
       }
-
     </div>
   )
 }
