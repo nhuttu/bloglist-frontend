@@ -56,7 +56,7 @@ const App = () => {
     console.log('logging in with', username, password)
     try {
       const user = await loginService.login({
-        username, password,
+        username, password
       })
       window.localStorage.setItem('loggedBlogUser', JSON.stringify(user))
       blogService.setToken(user.token)
@@ -69,6 +69,18 @@ const App = () => {
         setErrorMessage(null)
       }, 5000)
     }
+  }
+  const newLike = async ({ blog }) => {
+    console.log(blog)
+    const newBlog = {
+      user: blog.user.id,
+      likes: blog.likes + 1,
+      author: blog.author,
+      title: blog.title,
+      url: blog.url
+    }
+    const response = await blogService.update(blog.id, newBlog)
+    console.log(response)
   }
   const LogOut = () => {
     setUser(null)
@@ -86,13 +98,14 @@ const App = () => {
           </button>
         </p>
         <div>
-          <Togglable buttonLabel="create new blog">
-          <NewBlog handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
+          <Togglable buttonLabel="create new blog" buttonLabel2="cancel">
+            <h2>create new</h2>
+            <NewBlog handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
           </Togglable>
         </div>
         <h2>blogs</h2>
         {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
+          <Blog key={blog.id} blog={blog} newLike={newLike} />
         )}
       </div>
     )
