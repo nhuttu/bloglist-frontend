@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Login from './components/Login'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import NewBlog from './components/NewBlog'
 import Togglable from './components/Togglable'
-
+import { ErrorMsg, SuccessMsg } from './components/Notification'
 const App = () => {
 
   const [blogs, setBlogs] = useState([])
@@ -14,13 +14,11 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [sucMessage, setSucMessage] = useState(null)
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
+  const blogRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs(blogs)
+      setBlogs(blogs.sort((a, b) => b.likes - a.likes))
     )
   }, [])
 
@@ -32,24 +30,6 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
-  const ErrorMsg = ({ errorToDisplay }) => {
-    if (errorToDisplay)
-      return (
-        <div className='failure'>
-          {errorToDisplay}
-        </div>
-      )
-    return null
-  }
-  const SuccessMsg = ({ sucToDisplay }) => {
-    if (sucToDisplay)
-      return (
-        <div className='success'>
-          {sucToDisplay}
-        </div>
-      )
-    return null
-  }
 
   const handleLogin = async event => {
     event.preventDefault()
@@ -70,8 +50,21 @@ const App = () => {
       }, 5000)
     }
   }
-  const newLike = async ({ blog }) => {
-    console.log(blog)
+  const deleteBlog = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      try {
+        const response = await blogService.deletion(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        console.log(response)
+      } catch (e) {
+        setErrorMessage('maybe your token expired? error happened dumbo')
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }
+    }
+  }
+  const newLike = async (blog) => {
     const newBlog = {
       user: blog.user.id,
       likes: blog.likes + 1,
@@ -79,8 +72,9 @@ const App = () => {
       title: blog.title,
       url: blog.url
     }
-    const response = await blogService.update(blog.id, newBlog)
-    console.log(response)
+    await blogService.update(blog.id, newBlog)
+    const updatedBlog = { ...blog, likes: blog.likes + 1 }
+    setBlogs(blogs.map(b => b.id !== blog.id ? b : updatedBlog))
   }
   const LogOut = () => {
     setUser(null)
@@ -98,31 +92,24 @@ const App = () => {
           </button>
         </p>
         <div>
-          <Togglable buttonLabel="create new blog" buttonLabel2="cancel">
+          <Togglable buttonLabel="create new blog" buttonLabel2="cancel" ref={blogRef}>
             <h2>create new</h2>
-            <NewBlog handleAdd={handleAdd} title={title} setTitle={setTitle} url={url} setUrl={setUrl} author={author} setAuthor={setAuthor} />
+            <NewBlog handleAdd={handleAdd} />
           </Togglable>
         </div>
         <h2>blogs</h2>
         {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} newLike={newLike} />
+          <Blog key={blog.id} blog={blog} newLike={newLike} deleteBlog={deleteBlog} />
         )}
       </div>
     )
   }
-  const handleAdd = async event => {
-    event.preventDefault()
+  const handleAdd = async newblog => {
+    blogRef.current.toggleVisibility()
     try {
-      const blog = {
-        title: title,
-        url: url,
-        author: author
-      }
-      blogService.create(blog)
+      console.log(newblog)
+      const blog = await blogService.create(newblog)
       setBlogs(blogs.concat(blog))
-      setUrl('')
-      setAuthor('')
-      setTitle('')
       setSucMessage(`a new blog ${blog.title} by ${blog.author} added`)
       setTimeout(() => {
         setSucMessage(null)

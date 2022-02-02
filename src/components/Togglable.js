@@ -1,28 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useImperativeHandle } from "react";
+import PropTypes from "prop-types";
+// eslint-disable-next-line react/display-name
+const Togglable = React.forwardRef((props, ref) => {
+  const [visible, setVisible] = useState(false);
 
-const Togglable = (props) => {
-    const [visible, setVisible] = useState(false)
+  const hideWhenVisible = { display: visible ? "none" : "" };
+  const showWhenVisible = { display: visible ? "" : "none" };
 
-    const hideWhenVisible = { display: visible ? 'none' : '' }
-    const showWhenVisible = { display: visible ? '' : 'none' }
+  const toggleVisibility = () => {
+    setVisible(!visible);
+  };
+  useImperativeHandle(ref, () => {
+    return {
+      toggleVisibility,
+    };
+  });
+  Togglable.propTypes = {
+    buttonLabel: PropTypes.string.isRequired,
+  };
+  return (
+    <div style={{ display: "inline" }}>
+      <div style={hideWhenVisible}>
+        <button onClick={toggleVisibility}>{props.buttonLabel}</button>
+      </div>
+      <div style={showWhenVisible}>
+        {props.children}
+        <button onClick={toggleVisibility}>{props.buttonLabel2}</button>
+      </div>
+    </div>
+  );
+});
 
-    const toggleVisibility = () => {
-        setVisible(!visible)
-    }
-
-    return (
-        <div style={{ display: 'inline' }}>
-            <div style={hideWhenVisible}>
-                <button onClick={toggleVisibility}>{props.buttonLabel}</button>
-            </div>
-            <div style={showWhenVisible}>
-                
-
-                {props.children}
-                <button onClick={toggleVisibility}>{props.buttonLabel2}</button>
-            </div>
-        </div>
-    )
-}
-
-export default Togglable
+export default Togglable;

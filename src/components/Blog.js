@@ -1,15 +1,14 @@
-import React from 'react'
-import Togglable from './Togglable'
+import React from "react";
+import Togglable from "./Togglable";
 
-const Blog = ({ blog, newLike }) => {
+const Blog = ({ blog, newLike, deleteBlog }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
-    border: 'solid',
+    border: "solid",
     borderWidth: 1,
-    marginBottom: 5
-  }
-  console.log(blog)
+    marginBottom: 5,
+  };
 
   return (
     <div>
@@ -23,10 +22,11 @@ const Blog = ({ blog, newLike }) => {
           </div>
           <p>{blog.user.name}</p>
 
+          <button onClick={() => deleteBlog(blog)}>remove</button>
         </Togglable>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Blog
+export default Blog;
