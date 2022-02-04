@@ -12,7 +12,7 @@ const Blog = ({ blog, newLike, deleteBlog }) => {
 
   return (
     <div>
-      <div style={blogStyle} className="blog">
+      <div style={blogStyle} className="blog1">
         {blog.title} {blog.author}
         <Togglable buttonLabel="view" buttonLabel2="hide">
           <p>{blog.url}</p>
