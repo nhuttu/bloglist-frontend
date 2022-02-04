@@ -57,7 +57,7 @@ const App = () => {
         setBlogs(blogs.filter(b => b.id !== blog.id))
         console.log(response)
       } catch (e) {
-        setErrorMessage('maybe your token expired? error happened dumbo')
+        setErrorMessage("maybe your token expired, tryna delete others' blogs? error happened dumbo")
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
